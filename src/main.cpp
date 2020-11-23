@@ -42,10 +42,8 @@ void loop() {
     if(loc_euc_tick) {
         // process drums sounds
         // TODO - make list with structs/pointers for cleaner iteration
-        if(EUBIT_GET_BIT(&eubitKick, 0)) {
-            Serial.printf("Playing kick drum\n");
+        if(EUBIT_GET_BIT(&eubitKick, 0))
             drumKick.noteOn();
-        }
         eubitKick.ix = EUBIT_IX_INCR(&eubitKick, 1);
 
         if(EUBIT_GET_BIT(&eubitSnare, 0))

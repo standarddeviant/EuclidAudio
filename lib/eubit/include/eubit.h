@@ -53,6 +53,7 @@ typedef struct {
 )
 
 void eubit_init(eubit_seq_t *s, eubit_seq_len_t m, eubit_seq_len_t k);
+unsigned char eubit_take(eubit_seq_t *s);
 
 #endif // _EUBIT_H_
 
