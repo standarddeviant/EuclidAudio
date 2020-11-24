@@ -30,14 +30,21 @@
 #include <SD.h>
 #include <SerialFlash.h>
 
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
+
 // GUItool: begin automatically generated code
 AudioSynthSimpleDrum     drumKick;          //xy=134,80
 AudioSynthSimpleDrum     drumSnare;          //xy=134,135
 AudioSynthSimpleDrum     drumHiHat;          //xy=138,180
-AudioSynthKarplusStrong  string1;        //xy=171,265
+AudioSynthKarplusStrong  string1;        //xy=150,265
 AudioSynthToneSweep      tonesweep1;     //xy=177,382
 AudioSynthWaveform       waveform1;      //xy=178,320
 AudioEffectBitcrusher    bitcrusher1;    //xy=293,134
+AudioEffectChorus        stringChorus;        //xy=313,264
 AudioMixer4              mixerDrum;         //xy=473,142
 AudioMixer4              mixerMelody;         //xy=488,298
 AudioMixer4              mixerL;         //xy=718,178
@@ -46,18 +53,20 @@ AudioOutputI2S           i2s1;           //xy=1028,207
 AudioConnection          patchCord1(drumKick, 0, mixerDrum, 0);
 AudioConnection          patchCord2(drumSnare, bitcrusher1);
 AudioConnection          patchCord3(drumHiHat, 0, mixerDrum, 3);
-AudioConnection          patchCord4(string1, 0, mixerMelody, 0);
+AudioConnection          patchCord4(string1, stringChorus);
 AudioConnection          patchCord5(tonesweep1, 0, mixerMelody, 2);
 AudioConnection          patchCord6(waveform1, 0, mixerMelody, 1);
 AudioConnection          patchCord7(bitcrusher1, 0, mixerDrum, 1);
-AudioConnection          patchCord8(mixerDrum, 0, mixerL, 0);
-AudioConnection          patchCord9(mixerDrum, 0, mixerR, 0);
-AudioConnection          patchCord10(mixerMelody, 0, mixerR, 1);
-AudioConnection          patchCord11(mixerMelody, 0, mixerL, 1);
-AudioConnection          patchCord12(mixerL, 0, i2s1, 0);
-AudioConnection          patchCord13(mixerR, 0, i2s1, 1);
+AudioConnection          patchCord8(stringChorus, 0, mixerMelody, 0);
+AudioConnection          patchCord9(mixerDrum, 0, mixerL, 0);
+AudioConnection          patchCord10(mixerDrum, 0, mixerR, 0);
+AudioConnection          patchCord11(mixerMelody, 0, mixerR, 1);
+AudioConnection          patchCord12(mixerMelody, 0, mixerL, 1);
+AudioConnection          patchCord13(mixerL, 0, i2s1, 0);
+AudioConnection          patchCord14(mixerR, 0, i2s1, 1);
 AudioControlSGTL5000     sgtl5000_1;     //xy=459,379
 // GUItool: end automatically generated code
+
 
 
 
@@ -69,8 +78,9 @@ eubit_seq_t eubitHiHat;
 eubit_seq_t eubitString;
 
 #define DELAY_LINE_NSAMP (AUDIO_BLOCK_SAMPLES*4)
-short delayLineL[AUDIO_BLOCK_SAMPLES] = {0};
-short delayLineR[AUDIO_BLOCK_SAMPLES] = {0};
+short stringDelayLine[DELAY_LINE_NSAMP] = {0};
+// short delayLineR[DELAY_LINE_NSAMP] = {0};
+
 
 void setup_audio_objects(void) {
     AudioMemory(18);
@@ -104,8 +114,11 @@ void setup_audio_objects(void) {
     mixerDrum.gain(1, 0.500f);
     mixerDrum.gain(2, 0.400f);
 
-    eubit_init(&eubitString, 24, 7);
-    mixerMelody.gain(0, 0.1);
+    stringChorus.begin(stringDelayLine, DELAY_LINE_NSAMP, 4);
+    eubit_init(&eubitString, 25, 7);
+    mixerMelody.gain(0, 0.25);
+
+    
 
     // chorusL.begin(delayLineL, DELAY_LINE_NSAMP, 4);
     // chorusR.begin(delayLineL, DELAY_LINE_NSAMP, 4);

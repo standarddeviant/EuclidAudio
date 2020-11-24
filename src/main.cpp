@@ -65,7 +65,7 @@ void loop() {
         if(eubit_take(&eubitString))
             string1.noteOn(440.0f, 0.5);
         else
-            string1.noteOff(0.5);
+            string1.noteOff(0.1);
 
         // subtract one from g_euc_tick after processing a metronome tick
         noInterrupts();
