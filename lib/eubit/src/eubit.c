@@ -4,19 +4,23 @@
 extern "C" {
 #endif
 
+#include <math.h>
 #include "eubit.h"
 
 void eubit_init(eubit_seq_t *s,
                 eubit_seq_len_t num_steps,
-                eubit_seq_len_t num_pulses) {
+                eubit_seq_len_t num_onsets) {
     // TODO - assert k is >= 1
     // TODO - support different init rotations?
+
+    int current, previous=-1;
+    float slope = (float)num_onsets / (float)num_steps;
 
     // unsigned int itr, ix, a;
 
     // mirror input variables to struct
     s->m = num_steps;
-    s->k = num_pulses;
+    s->k = num_onsets;
 
     // zero out sequence bytes
     for(int itr=0; itr<EUBIT_MAX_SEQ_BYTE_LEN; itr++) {
@@ -25,22 +29,13 @@ void eubit_init(eubit_seq_t *s,
 
     // with the simple euclid algorithm below, rotating the index by 1 ensures
     // a beat on the 1st beat which is more typical
-    s->ix = 2;
-    float ratio = ((float)num_pulses) / ((float)num_steps);
-    float accum = 1.0f;
-    s->seq[EUBIT_IX_BYTE(s, 0)] += \
-        1 << EUBIT_IX_SHIFT(s, 0);
-    for(int count=1; count<num_steps; count++) {
-        // probably not quite right, but pretty good when starting @ ix=2
-        // m = n - k
-        if(ratio*((float)count) < accum) {
-            // nothing to do - zero or rest case
-        }
-        else {
+    for(int count=0; count<num_steps; count++) {
+        current = (unsigned char)(floor((float)count * slope));
+        if(current != previous) {
             s->seq[EUBIT_IX_BYTE(s, count)] += \
                 1 << EUBIT_IX_SHIFT(s, count);
-            accum += 1.0f;
         }
+        previous = current;
 
 #if 0
         ix = EUBIT_IX_INCR(s, 0);
@@ -58,7 +53,7 @@ void eubit_init(eubit_seq_t *s,
 #endif
 
 #if 0
-        bucket += num_pulses;
+        bucket += num_onsets;
         if (bucket >= num_steps) {
             bucket -= num_steps;
             // add a 'pulse' or '1' to the sequence
