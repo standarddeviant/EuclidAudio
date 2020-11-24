@@ -37,6 +37,7 @@ extern AudioOutputI2S           i2s1;           //xy=869,268
 extern eubit_seq_t eubitKick;
 extern eubit_seq_t eubitSnare;
 extern eubit_seq_t eubitHiHat;
+extern eubit_seq_t eubitString;
 void setup_audio_objects(void);
 
 #endif
