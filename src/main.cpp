@@ -3,6 +3,8 @@
 
 #include "audio_objects.h"
 
+#include "eubit_print.h"
+
 IntervalTimer g_euc_metronome;
 volatile unsigned int g_euc_tick = 0;
 // unsigned int g_euc_micros = (unsigned int)(1000000.0f / 120.0f / 16.0f);
@@ -15,6 +17,15 @@ void setup() {
     Serial.begin(115200);
 
     setup_audio_objects();
+    // while(true) {
+    //     eubit_print(&eubitKick);
+    //     delay(5000);
+    //     // eubit_print(&eubitSnare);
+    //     // delay(5000);
+    //     // eubit_print(&eubitHiHat);
+    //     // delay(5000);
+    // }
+
 
     // put your setup code here, to run once:
     g_euc_metronome.begin(euc_metronome_isr, g_euc_micros);
@@ -42,17 +53,19 @@ void loop() {
     if(loc_euc_tick) {
         // process drums sounds
         // TODO - make list with structs/pointers for cleaner iteration
-        if(EUBIT_GET_BIT(&eubitKick, 0))
+        if(eubit_take(&eubitKick))
             drumKick.noteOn();
-        eubitKick.ix = EUBIT_IX_INCR(&eubitKick, 1);
 
-        if(EUBIT_GET_BIT(&eubitSnare, 0))
+        if(eubit_take(&eubitSnare))
             drumSnare.noteOn();
-        eubitSnare.ix = EUBIT_IX_INCR(&eubitSnare, 1);
 
-        if(EUBIT_GET_BIT(&eubitHiHat, 0))
+        if(eubit_take(&eubitHiHat))
             drumHiHat.noteOn();
-        eubitHiHat.ix = EUBIT_IX_INCR(&eubitHiHat, 1);
+
+        if(eubit_take(&eubitString))
+            string1.noteOn(440.0f, 0.5);
+        else
+            string1.noteOff(0.5);
 
         // subtract one from g_euc_tick after processing a metronome tick
         noInterrupts();
